@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SaniTrack — Baños Químicos</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,400;0,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg:#0d1117; --surface:#161b22; --surface2:#21262d; --border:#30363d;
+  --accent:#58a6ff; --green:#3fb950; --yellow:#d29922; --red:#f85149;
+  --purple:#bc8cff; --text:#c9d1d9; --text2:#8b949e; --white:#f0f6fc;
+  --card:#1c2128;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+.app{display:flex;min-height:100vh;}
+.sidebar{width:220px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;flex-shrink:0;}
+.logo{padding:20px 16px 16px;border-bottom:1px solid var(--border);}
+.logo-name{font-family:'Syne',sans-serif;font-weight:800;font-size:20px;color:var(--white);}
+.logo-sub{font-size:10px;color:var(--text2);letter-spacing:1.5px;text-transform:uppercase;margin-top:2px;}
+.nav{padding:12px 8px;flex:1;}
+.nav-sec{font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;padding:8px 8px 4px;margin-top:4px;}
+.nav-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:6px;cursor:pointer;color:var(--text2);font-size:13px;font-weight:500;transition:all .15s;margin-bottom:1px;border:1px solid transparent;}
+.nav-item:hover{color:var(--white);background:var(--surface2);}
+.nav-item.active{color:var(--accent);background:rgba(88,166,255,.1);border-color:rgba(88,166,255,.2);}
+.nb{margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:1px 5px;border-radius:20px;min-width:18px;text-align:center;}
+.sidebar-bottom{padding:12px;border-top:1px solid var(--border);}
+.user-pill{display:flex;align-items:center;gap:8px;padding:8px;border-radius:8px;background:var(--surface2);}
+.user-av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#58a6ff,#bc8cff);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0;}
+.main{flex:1;display:flex;flex-direction:column;min-width:0;}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:100;flex-wrap:wrap;}
+.topbar-title{font-family:'Syne',sans-serif;font-weight:700;font-size:17px;color:var(--white);flex:1;}
+.topbar-date{font-size:12px;color:var(--text2);font-family:'DM Mono',monospace;}
+.btn{padding:7px 14px;border-radius:6px;border:none;cursor:pointer;font-family:'Inter',sans-serif;font-weight:500;font-size:13px;transition:all .15s;display:inline-flex;align-items:center;gap:5px;}
+.btn-primary{background:var(--accent);color:#0d1117;}.btn-primary:hover{background:#79b8ff;}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text);}.btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
+.btn-green{background:var(--green);color:#0d1117;}.btn-green:hover{background:#56d364;}
+.btn-red{background:var(--red);color:#fff;}
+.btn-wa{background:#25d366;color:#fff;}.btn-wa:hover{background:#1ebe5d;}
+.btn-sm{padding:5px 10px;font-size:12px;}.btn-xs{padding:3px 8px;font-size:11px;}
+.snd-btn{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:6px 10px;cursor:pointer;color:var(--text2);font-size:12px;display:flex;align-items:center;gap:4px;transition:all .15s;}
+.snd-btn.on{border-color:var(--green);color:var(--green);background:rgba(63,185,80,.08);}
+.content{padding:20px 24px;flex:1;}
+.page{display:none;}.page.active{display:block;}
+
+/* PLAN */
+.greeting{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:var(--white);margin-bottom:3px;}
+.greeting-sub{font-size:14px;color:var(--text2);margin-bottom:20px;}
+.res-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px;}
+.res-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:15px 16px;position:relative;overflow:hidden;}
+.res-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.rc-red::after{background:var(--red);}.rc-yellow::after{background:var(--yellow);}
+.rc-blue::after{background:var(--accent);}.rc-green::after{background:var(--green);}
+.res-n{font-family:'Syne',sans-serif;font-size:30px;font-weight:800;line-height:1;}
+.rc-red .res-n{color:var(--red);}.rc-yellow .res-n{color:var(--yellow);}
+.rc-blue .res-n{color:var(--accent);}.rc-green .res-n{color:var(--green);}
+.res-l{font-size:12px;color:var(--text2);margin-top:4px;}
+.res-ico{position:absolute;right:12px;top:14px;font-size:22px;opacity:.15;}
+
+/* DÍAS */
+.dias-wrap{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px;}
+.dia-card{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;cursor:pointer;transition:all .2s;}
+.dia-card:hover{border-color:var(--accent);transform:translateY(-2px);}
+.dia-card.es-hoy{border-color:var(--accent);box-shadow:0 0 0 1px rgba(88,166,255,.3);}
+.dia-card.es-sel{border-color:var(--green);background:rgba(63,185,80,.04);}
+.dia-head{padding:9px 12px;background:var(--surface2);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.dia-nom{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text2);}
+.dia-fec{font-size:12px;font-family:'DM Mono';color:var(--text);}
+.es-hoy .dia-nom{color:var(--accent);}
+.dia-body{padding:8px 10px;min-height:75px;}
+.tarea-mini{display:flex;align-items:center;gap:5px;padding:4px 0;border-bottom:1px solid rgba(48,54,61,.4);font-size:11px;}
+.tarea-mini:last-child{border-bottom:none;}
+.tm-ico{font-size:13px;flex-shrink:0;}
+.dia-empty{color:var(--text2);font-size:11px;padding:6px 0;font-style:italic;}
+.dia-foot{display:flex;gap:5px;padding:6px 10px;flex-wrap:wrap;}
+.dc{font-size:10px;padding:2px 6px;border-radius:20px;font-weight:600;}
+.dc-r{background:rgba(248,81,73,.12);color:var(--red);}
+.dc-y{background:rgba(210,153,34,.12);color:var(--yellow);}
+.dc-g{background:rgba(63,185,80,.12);color:var(--green);}
+.dia-prog{padding:0 10px 7px;}
+.prog{background:var(--border);border-radius:3px;height:4px;overflow:hidden;}
+.prog-f{height:100%;border-radius:3px;background:var(--green);transition:width .5s;}
+
+/* DETALLE DÍA */
+.det-wrap{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+.det-head{padding:13px 18px;background:var(--surface2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.det-title{font-family:'Syne',sans-serif;font-weight:700;font-size:15px;color:var(--white);}
+.tarea-row{display:flex;align-items:center;gap:10px;padding:12px 18px;border-bottom:1px solid var(--border);transition:background .15s;}
+.tarea-row:last-child{border-bottom:none;}
+.tarea-row:hover{background:rgba(88,166,255,.02);}
+.tarea-row.done .tarea-bano{text-decoration:line-through;color:var(--text2);}
+.tarea-row.done .tarea-cli{opacity:.5;}
+.check-box{width:18px;height:18px;border-radius:4px;border:2px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;}
+.check-box.checked{background:var(--green);border-color:var(--green);}
+.check-box.checked::after{content:'✓';color:#0d1117;font-size:10px;font-weight:700;}
+.tipo-badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;text-transform:uppercase;letter-spacing:.3px;flex-shrink:0;}
+.tb-d{background:rgba(88,166,255,.1);color:var(--accent);}
+.tb-r{background:rgba(248,81,73,.1);color:var(--red);}
+.tarea-info{flex:1;}
+.tarea-bano{font-weight:600;font-size:13px;color:var(--white);}
+.tarea-cli{font-size:12px;color:var(--text2);}
+.tarea-acts{display:flex;gap:5px;flex-shrink:0;}
+.vcdo{font-size:10px;padding:2px 7px;background:rgba(248,81,73,.15);color:var(--red);border-radius:20px;font-weight:700;flex-shrink:0;}
+
+/* TABLA */
+.filtros{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;align-items:center;}
+.filtro{padding:5px 11px;border-radius:20px;font-size:12px;cursor:pointer;border:1px solid var(--border);color:var(--text2);background:transparent;transition:all .15s;}
+.filtro:hover,.filtro.on{border-color:var(--accent);color:var(--accent);background:rgba(88,166,255,.08);}
+.t-wrap{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+.t-bar{padding:10px 14px;background:var(--surface2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+table{width:100%;border-collapse:collapse;}
+th{padding:9px 12px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--text2);font-weight:500;background:var(--surface2);border-bottom:1px solid var(--border);}
+td{padding:10px 12px;font-size:13px;border-bottom:1px solid rgba(48,54,61,.4);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(88,166,255,.02);}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:20px;font-size:11px;font-weight:600;}
+.badge::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+.bg{background:rgba(63,185,80,.1);color:var(--green);}.bg::before{background:var(--green);}
+.br{background:rgba(248,81,73,.1);color:var(--red);}.br::before{background:var(--red);}
+.by{background:rgba(210,153,34,.1);color:var(--yellow);}.by::before{background:var(--yellow);}
+.bb{background:rgba(88,166,255,.1);color:var(--accent);}.bb::before{background:var(--accent);}
+.bx{background:rgba(139,148,158,.1);color:var(--text2);}.bx::before{background:var(--text2);}
+
+/* REPORTES */
+.rep-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;}
+.chart-card.full{grid-column:1/-1;}
+.chart-title{font-weight:600;font-size:14px;color:var(--white);margin-bottom:2px;}
+.chart-sub{font-size:12px;color:var(--text2);margin-bottom:14px;}
+.s-row{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);}
+.s-row:last-child{border-bottom:none;}
+.s-val{font-family:'DM Mono';font-size:13px;font-weight:600;color:var(--accent);}
+
+/* MODAL */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;}
+.overlay.open{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:22px;width:480px;max-width:92vw;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.6);animation:mi .2s ease;}
+@keyframes mi{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+.m-title{font-family:'Syne',sans-serif;font-weight:700;font-size:16px;color:var(--white);margin-bottom:16px;}
+.fg-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.fg{display:flex;flex-direction:column;gap:4px;}.fg.full{grid-column:1/-1;}
+label{font-size:11px;color:var(--text2);font-weight:500;text-transform:uppercase;letter-spacing:.4px;}
+input,select,textarea{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:7px 10px;color:var(--white);font-family:'Inter';font-size:13px;outline:none;transition:border-color .15s;width:100%;}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);}
+select option{background:var(--surface2);}
+textarea{resize:vertical;min-height:55px;}
+.m-foot{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;padding-top:12px;border-top:1px solid var(--border);}
+.dg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+.di{background:var(--surface2);border-radius:7px;padding:10px 12px;}
+.di label{display:block;font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.7px;margin-bottom:2px;}
+.di span{font-size:13px;font-weight:500;color:var(--white);}
+
+/* TOASTS */
+#toasts{position:fixed;bottom:18px;right:18px;z-index:9999;display:flex;flex-direction:column;gap:7px;pointer-events:none;}
+.toast{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:11px 14px;display:flex;align-items:flex-start;gap:9px;min-width:280px;max-width:360px;box-shadow:0 8px 24px rgba(0,0,0,.5);pointer-events:all;animation:ti .25s ease;border-left:3px solid var(--accent);}
+.toast.tr{border-left-color:var(--red);}.toast.tg{border-left-color:var(--green);}.toast.tw{border-left-color:#25d366;}
+@keyframes ti{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:translateX(0)}}
+.t-ico{font-size:17px;flex-shrink:0;}.t-b{flex:1;}.t-t{font-weight:600;font-size:12px;color:var(--white);margin-bottom:1px;}.t-d{font-size:11px;color:var(--text2);}
+.t-x{cursor:pointer;color:var(--text2);font-size:13px;padding:0 2px;}
+
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+
+/* ============================================================
+   RESPONSIVE MOBILE
+   ============================================================ */
+@media(max-width:768px){
+
+  /* Sidebar se oculta por defecto en móvil */
+  .sidebar{
+    position:fixed;left:0;top:0;bottom:0;z-index:300;
+    transform:translateX(-100%);transition:transform .25s ease;
+    width:240px;height:100vh;
+  }
+  .sidebar.mob-open{transform:translateX(0);}
+
+  /* Overlay oscuro detrás del sidebar */
+  #mob-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:299;}
+  #mob-overlay.on{display:block;}
+
+  /* El main ocupa todo el ancho */
+  .main{width:100vw;}
+
+  /* Topbar mobile: solo título + hamburguesa */
+  .topbar{padding:10px 14px;gap:8px;}
+  .topbar-title{font-size:15px;}
+  .topbar-date{display:none;}
+  /* Ocultar botones extras en topbar mobile, se mueven al FAB */
+  .topbar .btn-primary{display:none;}
+  .topbar .snd-btn{display:none;}
+  .topbar .btn-ghost{display:none;}
+
+  /* Botón hamburguesa */
+  #mob-menu-btn{
+    display:flex;align-items:center;justify-content:center;
+    width:36px;height:36px;border-radius:8px;
+    background:var(--surface2);border:1px solid var(--border);
+    cursor:pointer;font-size:18px;flex-shrink:0;order:-1;
+  }
+
+  /* Contenido con padding bottom para barra inferior */
+  .content{padding:14px 14px 80px;}
+
+  /* Grillas adaptadas */
+  .res-grid{grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px;}
+  .dias-wrap{grid-template-columns:repeat(5,1fr);gap:6px;}
+  .dia-body{min-height:60px;padding:6px 7px;}
+  .dia-head{padding:7px 8px;}
+  .dia-nom{font-size:10px;letter-spacing:0;}
+  .dia-fec{font-size:11px;}
+  .tarea-mini{font-size:10px;}
+  .tm-ico{font-size:12px;}
+
+  /* Tarea row en móvil: stack vertical */
+  .tarea-row{flex-wrap:wrap;padding:10px 12px;gap:8px;}
+  .tarea-info{width:calc(100% - 60px);}
+  .tarea-acts{width:100%;justify-content:flex-end;margin-top:4px;}
+  .vcdo{display:none;}
+
+  /* Tablas: scroll horizontal */
+  .t-wrap{overflow-x:auto;}
+
+  /* Reportes: 1 columna */
+  .rep-grid{grid-template-columns:1fr;}
+
+  /* Modal full-screen en móvil */
+  .modal{width:100vw;max-width:100vw;min-height:50vh;border-radius:16px 16px 0 0;position:fixed;bottom:0;left:0;right:0;margin:0;max-height:92vh;}
+  .overlay{align-items:flex-end;}
+
+  /* Form grid 1 col */
+  .fg-grid{grid-template-columns:1fr;}
+  .fg.full{grid-column:1;}
+
+  /* Detalle grid 1 col */
+  .dg{grid-template-columns:1fr;}
+
+  /* Toast más pequeño */
+  #toasts{bottom:76px;right:10px;left:10px;}
+  .toast{min-width:0;width:100%;}
+
+  /* Texto más grande en inputs (evita zoom en iOS) */
+  input,select,textarea{font-size:16px !important;}
+
+  /* Saludo más pequeño */
+  .greeting{font-size:20px;}
+  .greeting-sub{font-size:13px;margin-bottom:14px;}
+
+  /* Detalle día header wrap */
+  .det-head{flex-direction:column;align-items:flex-start;gap:8px;}
+  .det-head > div{width:100%;display:flex;gap:6px;flex-wrap:wrap;}
+
+  /* Números KPI más pequeños */
+  .res-n{font-size:26px;}
+  .res-l{font-size:11px;}
+}
+
+/* BARRA INFERIOR DE NAVEGACIÓN (solo mobile) */
+#mob-nav{
+  display:none;
+  position:fixed;bottom:0;left:0;right:0;
+  background:var(--surface);border-top:1px solid var(--border);
+  z-index:200;padding:6px 0 8px;
+}
+#mob-nav .mn-items{display:flex;justify-content:space-around;align-items:center;}
+#mob-nav .mn-item{
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:6px 10px;cursor:pointer;color:var(--text2);
+  font-size:10px;font-weight:500;border-radius:8px;
+  transition:all .15s;min-width:52px;position:relative;
+}
+#mob-nav .mn-item.active{color:var(--accent);}
+#mob-nav .mn-item span.ico{font-size:20px;}
+#mob-nav .mn-badge{
+  position:absolute;top:4px;right:8px;
+  background:var(--red);color:#fff;font-size:9px;font-weight:700;
+  padding:1px 4px;border-radius:20px;min-width:16px;text-align:center;
+}
+
+/* FAB botón + nuevo baño en móvil */
+#mob-fab{
+  display:none;
+  position:fixed;bottom:72px;right:16px;z-index:250;
+  width:52px;height:52px;border-radius:50%;
+  background:var(--accent);border:none;cursor:pointer;
+  font-size:24px;box-shadow:0 4px 16px rgba(88,166,255,.4);
+  align-items:center;justify-content:center;
+  transition:transform .15s;
+}
+#mob-fab:hover{transform:scale(1.08);}
+
+@media(max-width:768px){
+  #mob-nav{display:block;}
+  #mob-fab{display:flex;}
+  #mob-menu-btn{display:flex;}
+}
+@media(min-width:769px){
+  #mob-menu-btn{display:none;}
+  #mob-overlay{display:none!important;}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-name">🚽 SaniTrack</div>
+    <div class="logo-sub">Baños Químicos</div>
+  </div>
+  <nav class="nav">
+    <div class="nav-sec">Principal</div>
+    <div class="nav-item active" onclick="ir('plan')"><span>📋</span> Plan de trabajo <span class="nb" id="nb-u">0</span></div>
+    <div class="nav-item" onclick="ir('banos')"><span>🚻</span> Todos los baños</div>
+    <div class="nav-sec">Gestión</div>
+    <div class="nav-item" onclick="ir('clientes')"><span>🏢</span> Clientes</div>
+    <div class="nav-item" onclick="ir('vehiculos')"><span>🚛</span> Vehículos</div>
+    <div class="nav-sec">Análisis</div>
+    <div class="nav-item" onclick="ir('reportes')"><span>📊</span> Reportes</div>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="user-pill">
+      <div class="user-av">A</div>
+      <div><div style="font-size:12px;font-weight:600;color:var(--white);">Admin</div><div style="font-size:10px;color:var(--text2);">Supervisor</div></div>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <div id="mob-menu-btn" onclick="toggleSidebar()">☰</div>
+    <div class="topbar-title" id="tt">Plan de trabajo</div>
+    <div class="topbar-date" id="f-hoy"></div>
+    <button class="btn btn-primary" onclick="abrirM('m-nuevo-bano')">+ Nuevo baño</button>
+    <button class="snd-btn on" id="sbtn" onclick="toggleSon()">🔔 Sonido</button>
+    <button class="btn btn-ghost btn-sm" onclick="abrirTecnicos()">👥 Técnicos</button>
+  </div>
+  <div id="toasts"></div>
+  <div class="content">
+
+    <!-- PLAN -->
+    <div class="page active" id="page-plan">
+      <div class="greeting" id="saludo">Buen día 👋</div>
+      <div class="greeting-sub">Este es tu plan de trabajo. Empezá por los <span style="color:var(--red);font-weight:600;">rojos</span> — son los más urgentes.</div>
+
+      <div class="res-grid">
+        <div class="res-card rc-red"><div class="res-ico">🚨</div><div class="res-n" id="r-urg">0</div><div class="res-l">Vencidos / urgentes</div></div>
+        <div class="res-card rc-yellow"><div class="res-ico">🧴</div><div class="res-n" id="r-hoy">0</div><div class="res-l">Para hacer hoy</div></div>
+        <div class="res-card rc-blue"><div class="res-ico">📅</div><div class="res-n" id="r-sem">0</div><div class="res-l">Esta semana</div></div>
+        <div class="res-card rc-green"><div class="res-ico">✅</div><div class="res-n" id="r-ok">0</div><div class="res-l">Completados hoy</div></div>
+      </div>
+
+      <div style="font-family:'Syne';font-weight:700;font-size:14px;color:var(--white);margin-bottom:10px;">Semana — hacé clic en un día para ver las tareas</div>
+      <div class="dias-wrap" id="dias-wrap"></div>
+
+      <div class="det-wrap" id="det-dia">
+        <div class="det-head">
+          <div class="det-title" id="det-titulo">👆 Seleccioná un día arriba</div>
+          <div style="display:flex;gap:6px;">
+            <button class="btn btn-wa btn-sm" id="btn-wa-dia" style="display:none" onclick="waResumenDia()">💬 WA resumen</button>
+            <button class="btn btn-ghost btn-sm" id="btn-todo" style="display:none" onclick="completarTodo()">✓ Marcar todo</button>
+          </div>
+        </div>
+        <div id="det-lista"><div style="padding:18px;color:var(--text2);font-size:13px;">Seleccioná un día para ver las tareas.</div></div>
+      </div>
+    </div>
+
+    <!-- BAÑOS -->
+    <div class="page" id="page-banos">
+      <div class="filtros" id="fb">
+        <button class="filtro on" onclick="fBanos('todos',this)">Todos</button>
+        <button class="filtro" onclick="fBanos('en_uso',this)">En uso</button>
+        <button class="filtro" onclick="fBanos('disponible',this)">Disponibles</button>
+        <button class="filtro" onclick="fBanos('mantenimiento',this)">Mantenimiento</button>
+        <button class="filtro" onclick="fBanos('desinf_urg',this)">🔴 Desinf. urgente</button>
+        <button class="filtro" onclick="fBanos('retiro_urg',this)">🚛 Retiro urgente</button>
+        <span style="margin-left:auto;font-size:12px;color:var(--text2);" id="fc"></span>
+      </div>
+      <div class="t-wrap">
+        <div class="t-bar">
+          <span style="font-size:13px;font-weight:600;color:var(--white);">Lista de baños</span>
+          <button class="btn btn-ghost btn-sm" onclick="expCSV()" style="margin-left:auto;">⬇ CSV</button>
+        </div>
+        <div style="overflow-x:auto;"><table><thead><tr>
+          <th>Baño</th><th>Estado</th><th>Cliente</th><th>Zona</th><th>Última desinf.</th><th>Próx. desinf.</th><th>Retiro</th><th>Técnico</th><th>Acciones</th>
+        </tr></thead><tbody id="tb-banos"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- CLIENTES -->
+    <div class="page" id="page-clientes">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <span style="font-size:15px;font-weight:600;color:var(--white);">Clientes</span>
+        <button class="btn btn-primary" onclick="abrirM('m-cliente')">+ Nuevo cliente</button>
+      </div>
+      <div class="t-wrap"><table><thead><tr><th>Cliente</th><th>Contacto</th><th>Zona</th><th>Baños activos</th><th>Próx. vencimiento</th></tr></thead><tbody id="tb-clientes"></tbody></table></div>
+    </div>
+
+    <!-- VEHÍCULOS -->
+    <div class="page" id="page-vehiculos">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <span style="font-size:15px;font-weight:600;color:var(--white);">Vehículos</span>
+        <button class="btn btn-primary" onclick="abrirM('m-vehiculo')">+ Nuevo vehículo</button>
+      </div>
+      <div class="t-wrap"><table><thead><tr><th>Patente</th><th>Chofer</th><th>Zona</th><th>Capacidad</th><th>Próx. service</th><th>Estado</th></tr></thead><tbody id="tb-veh"></tbody></table></div>
+    </div>
+
+    <!-- REPORTES -->
+    <div class="page" id="page-reportes">
+      <div style="font-family:'Syne';font-weight:700;font-size:17px;color:var(--white);margin-bottom:16px;">📊 Reportes y estadísticas</div>
+      <div class="rep-grid">
+        <div class="chart-card"><div class="chart-title">Estado del parque</div><div class="chart-sub">Distribución actual de 150 baños</div><canvas id="ch-estado" height="210"></canvas></div>
+        <div class="chart-card"><div class="chart-title">Ocupación por zona</div><div class="chart-sub">En uso vs disponibles</div><canvas id="ch-zonas" height="210"></canvas></div>
+      </div>
+      <div class="rep-grid">
+        <div class="chart-card"><div class="chart-title">Desinfecciones por mes</div><div class="chart-sub">Programadas vs realizadas — últimos 6 meses</div><canvas id="ch-desinf" height="200"></canvas></div>
+        <div class="chart-card"><div class="chart-title">Retiros y entregas</div><div class="chart-sub">Movimiento mensual</div><canvas id="ch-mov" height="200"></canvas></div>
+      </div>
+      <div class="rep-grid">
+        <div class="chart-card"><div class="chart-title">📋 Resumen operativo hoy</div><div class="chart-sub">Indicadores clave</div><div id="op-resumen"></div></div>
+        <div class="chart-card"><div class="chart-title">🏆 Top clientes</div><div class="chart-sub">Por cantidad de baños activos</div><div id="top-cl"></div></div>
+      </div>
+    </div>
+
+  </div>
+</main>
+</div>
+
+<!-- MODALES -->
+<div class="overlay" id="m-nuevo-bano">
+  <div class="modal">
+    <div class="m-title">🚻 Nuevo baño</div>
+    <div class="fg-grid">
+      <div class="fg"><label>Código</label><input id="nb-id" placeholder="BQ-151"></div>
+      <div class="fg"><label>Estado</label><select id="nb-est"><option value="disponible">Disponible</option><option value="en_uso">En uso</option><option value="mantenimiento">Mantenimiento</option></select></div>
+      <div class="fg full"><label>Cliente / Ubicación</label><input id="nb-cli"></div>
+      <div class="fg"><label>Zona</label><select id="nb-zona"><option>Norte</option><option>Sur</option><option>Este</option><option>Oeste</option><option>Centro</option></select></div>
+      <div class="fg"><label>Técnico</label><input id="nb-tec"></div>
+      <div class="fg"><label>Frecuencia desinf. (días)</label><input id="nb-freq" type="number" value="7"></div>
+      <div class="fg"><label>Vence contrato</label><input id="nb-vence" type="date"></div>
+      <div class="fg full"><label>Notas</label><textarea id="nb-notas"></textarea></div>
+    </div>
+    <div class="m-foot">
+      <button class="btn btn-ghost" onclick="cerrarM('m-nuevo-bano')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarBano()">✓ Registrar</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="m-detalle">
+  <div class="modal" style="width:520px;">
+    <div class="m-title" id="m-det-tit">Detalle</div>
+    <div class="dg" id="m-det-grid"></div>
+    <div style="font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:7px;">Historial</div>
+    <div id="m-det-hist"></div>
+    <div class="m-foot">
+      <button class="btn btn-ghost btn-sm" onclick="cerrarM('m-detalle')">Cerrar</button>
+      <button class="btn btn-wa btn-sm" id="det-wad">💬 WA Desinf.</button>
+      <button class="btn btn-wa btn-sm" id="det-war">💬 WA Retiro</button>
+      <button class="btn btn-green btn-sm" id="det-bd">🧴 Desinf. hecha</button>
+      <button class="btn btn-red btn-sm" id="det-br">🚛 Retirar</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="m-tecnicos">
+  <div class="modal">
+    <div class="m-title">👥 Técnicos y WhatsApp</div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:12px;">Número con código de país, sin espacios. Ej: <span style="font-family:'DM Mono';color:var(--accent)">5492614001234</span></p>
+    <div id="tec-lista"></div>
+    <div style="background:rgba(37,211,102,.06);border:1px solid rgba(37,211,102,.2);border-radius:8px;padding:10px 12px;margin:10px 0;font-size:12px;color:#25d366;">
+      💬 Hacé clic en cualquier botón "WA" en las tareas o baños para abrir WhatsApp con el mensaje ya armado.
+    </div>
+    <div style="border-top:1px solid var(--border);padding-top:12px;">
+      <div style="font-size:11px;color:var(--text2);text-transform:uppercase;margin-bottom:8px;">Envío masivo</div>
+      <div style="display:flex;gap:7px;flex-wrap:wrap;">
+        <button class="btn btn-wa btn-sm" onclick="waMasivo('desinf')">💬 Desinf. de hoy</button>
+        <button class="btn btn-wa btn-sm" onclick="waMasivo('retiro')">💬 Retiros urgentes</button>
+      </div>
+    </div>
+    <div class="m-foot">
+      <button class="btn btn-ghost" onclick="cerrarM('m-tecnicos')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarTecnicos()">✓ Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="m-cliente">
+  <div class="modal">
+    <div class="m-title">🏢 Nuevo cliente</div>
+    <div class="fg-grid">
+      <div class="fg full"><label>Nombre</label><input id="cl-n"></div>
+      <div class="fg"><label>Contacto</label><input id="cl-c"></div>
+      <div class="fg"><label>Teléfono</label><input id="cl-t"></div>
+      <div class="fg"><label>Email</label><input id="cl-e" type="email"></div>
+      <div class="fg"><label>Zona</label><select id="cl-z"><option>Norte</option><option>Sur</option><option>Este</option><option>Oeste</option><option>Centro</option></select></div>
+    </div>
+    <div class="m-foot">
+      <button class="btn btn-ghost" onclick="cerrarM('m-cliente')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarCliente()">✓ Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="m-vehiculo">
+  <div class="modal">
+    <div class="m-title">🚛 Nuevo vehículo</div>
+    <div class="fg-grid">
+      <div class="fg"><label>Patente</label><input id="vh-p"></div>
+      <div class="fg"><label>Chofer</label><input id="vh-c"></div>
+      <div class="fg"><label>Zona</label><select id="vh-z"><option>Norte</option><option>Sur</option><option>Este</option><option>Oeste</option><option>Centro</option></select></div>
+      <div class="fg"><label>Capacidad</label><input id="vh-cap" type="number" value="5"></div>
+      <div class="fg"><label>Próx. service</label><input id="vh-s" type="date"></div>
+    </div>
+    <div class="m-foot">
+      <button class="btn btn-ghost" onclick="cerrarM('m-vehiculo')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarVehiculo()">✓ Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Overlay móvil para cerrar sidebar -->
+<div id="mob-overlay" onclick="toggleSidebar()"></div>
+
+<!-- FAB + Nuevo baño (móvil) -->
+<button id="mob-fab" onclick="abrirM('m-nuevo-bano')" title="Nuevo baño">＋</button>
+
+<!-- Barra inferior de navegación (móvil) -->
+<div id="mob-nav">
+  <div class="mn-items">
+    <div class="mn-item active" id="mn-plan" onclick="ir('plan');setMobNav('plan')">
+      <span class="ico">📋</span><span>Plan</span>
+      <span class="mn-badge" id="mn-badge" style="display:none">0</span>
+    </div>
+    <div class="mn-item" id="mn-banos" onclick="ir('banos');setMobNav('banos')">
+      <span class="ico">🚻</span><span>Baños</span>
+    </div>
+    <div class="mn-item" id="mn-clientes" onclick="ir('clientes');setMobNav('clientes')">
+      <span class="ico">🏢</span><span>Clientes</span>
+    </div>
+    <div class="mn-item" id="mn-vehiculos" onclick="ir('vehiculos');setMobNav('vehiculos')">
+      <span class="ico">🚛</span><span>Vehículos</span>
+    </div>
+    <div class="mn-item" id="mn-reportes" onclick="ir('reportes');setMobNav('reportes')">
+      <span class="ico">📊</span><span>Reportes</span>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// MOBILE NAV
+// ============================================================
+function toggleSidebar(){
+  const sb=document.querySelector('.sidebar');
+  const ov=document.getElementById('mob-overlay');
+  sb.classList.toggle('mob-open');
+  ov.classList.toggle('on');
+}
+function setMobNav(id){
+  document.querySelectorAll('.mn-item').forEach(x=>x.classList.remove('active'));
+  const el=document.getElementById('mn-'+id);
+  if(el) el.classList.add('active');
+  document.querySelector('.sidebar').classList.remove('mob-open');
+  document.getElementById('mob-overlay').classList.remove('on');
+}
+function syncMobBadge(){
+  const n=document.getElementById('nb-u').textContent;
+  const mb=document.getElementById('mn-badge');
+  if(mb){mb.textContent=n;mb.style.display=parseInt(n)>0?'block':'none';}
+}
+
+// ============================================================
+// UTILS
+// ============================================================
+const HOY=new Date();
+const DNOMS=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+const MESES=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const ZONAS=['Norte','Sur','Este','Oeste','Centro'];
+
+function addD(d,n){const r=new Date(d);r.setDate(r.getDate()+n);return r;}
+function fmt(d){return new Date(d).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'});}
+function diff(a,b){const A=new Date(a);A.setHours(0,0,0,0);const B=new Date(b);B.setHours(0,0,0,0);return Math.round((A-B)/86400000);}
+
+// ============================================================
+// DATOS
+// ============================================================
+const CLIENTES=[
+  {id:'CL001',nombre:'Constructora Mendoza SA',contacto:'Ing. Pérez',tel:'261-555-1001',email:'ops@cmsa.com',zona:'Norte'},
+  {id:'CL002',nombre:'Evento Brava SRL',contacto:'Laura Gómez',tel:'261-555-2002',email:'eventos@brava.com',zona:'Centro'},
+  {id:'CL003',nombre:'Minera del Sol',contacto:'Carlos Ruiz',tel:'261-555-3003',email:'log@minsol.com',zona:'Este'},
+  {id:'CL004',nombre:'Finca Vitícola Andina',contacto:'María Torres',tel:'261-555-4004',email:'info@finca.com',zona:'Sur'},
+  {id:'CL005',nombre:'Municipalidad Sur',contacto:'Lic. Fernández',tel:'261-555-5005',email:'srv@munsur.gob',zona:'Oeste'},
+];
+let clientes=[...CLIENTES];
+
+let tecnicos=[
+  {nombre:'Ramón L.',tel:'5492614001001'},
+  {nombre:'Pablo D.',tel:'5492614001002'},
+  {nombre:'Sergio M.',tel:'5492614001003'},
+  {nombre:'Andrés C.',tel:'5492614001004'},
+  {nombre:'Luis H.',tel:'5492614001005'},
+];
+
+let vehiculos=[
+  {pat:'MZA-123',cho:'Ramón López',zona:'Norte',cap:6,srv:fmt(addD(HOY,15)),est:'activo'},
+  {pat:'MZA-456',cho:'Pablo Díaz',zona:'Sur',cap:5,srv:fmt(addD(HOY,3)),est:'activo'},
+  {pat:'MZA-789',cho:'Sergio Mora',zona:'Este',cap:8,srv:fmt(addD(HOY,-2)),est:'service_vencido'},
+  {pat:'MZA-012',cho:'Andrés Castro',zona:'Oeste',cap:5,srv:fmt(addD(HOY,30)),est:'activo'},
+  {pat:'MZA-345',cho:'Luis Herrera',zona:'Centro',cap:7,srv:fmt(addD(HOY,7)),est:'activo'},
+];
+
+function genBanos(){
+  const list=[];const dists={en_uso:85,disponible:45,mantenimiento:20};let i=0;
+  for(const [est,cant] of Object.entries(dists)){
+    for(let j=0;j<cant;j++){
+      const id='BQ-'+(101+i).toString().padStart(3,'0');
+      const cl=CLIENTES[Math.floor(Math.random()*CLIENTES.length)];
+      const zona=ZONAS[Math.floor(Math.random()*ZONAS.length)];
+      const freq=[5,7,10,14][Math.floor(Math.random()*4)];
+      const atras=Math.floor(Math.random()*freq*1.6);
+      const ultD=addD(HOY,-atras);
+      const proxD=addD(ultD,freq);
+      const diasV=est==='en_uso'?Math.floor(Math.random()*45)+1:null;
+      const vence=diasV?addD(HOY,diasV):null;
+      const tec=tecnicos[Math.floor(Math.random()*tecnicos.length)].nombre;
+      list.push({id,est,cliente:est==='en_uso'?cl.nombre:'—',clienteId:est==='en_uso'?cl.id:null,
+        zona,freq,ultD,proxD,vence,tec,
+        instalacion:addD(HOY,-Math.floor(Math.random()*400)-30),notas:'',
+        hist:Array.from({length:4},(_,k)=>({fecha:fmt(addD(ultD,-k*freq)),tipo:'Desinfección',tec,nota:'Normal'}))});
+      i++;
+    }
+  }
+  return list;
+}
+let banos=genBanos();
+
+// Tareas completadas
+let completadas=new Set();
+
+// ============================================================
+// SONIDO
+// ============================================================
+let sonOn=true,actx=null;
+function getCtx(){if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)();return actx;}
+function toggleSon(){
+  sonOn=!sonOn;
+  const b=document.getElementById('sbtn');
+  b.textContent=sonOn?'🔔 Sonido':'🔕 Silencio';
+  b.className='snd-btn'+(sonOn?' on':'');
+  toast(sonOn?'🔔':'🔕','Sonido '+(sonOn?'activado':'silenciado'),'');
+}
+function playS(tipo){
+  if(!sonOn)return;
+  try{
+    const c=getCtx();
+    const s={urgente:[{f:880,t:0,d:.1},{f:880,t:.13,d:.1},{f:1100,t:.28,d:.25}],
+              warn:[{f:660,t:0,d:.15},{f:550,t:.2,d:.25}],
+              ok:[{f:600,t:0,d:.09},{f:800,t:.11,d:.09},{f:1000,t:.22,d:.14}]}[tipo]||[];
+    s.forEach(({f,t,d})=>{
+      const o=c.createOscillator(),g=c.createGain();
+      o.connect(g);g.connect(c.destination);o.type='sine';o.frequency.value=f;
+      const st=c.currentTime+t;
+      g.gain.setValueAtTime(0,st);g.gain.linearRampToValueAtTime(.2,st+.02);g.gain.exponentialRampToValueAtTime(.001,st+d);
+      o.start(st);o.stop(st+d+.05);
+    });
+  }catch(e){}
+}
+
+// ============================================================
+// TOASTS
+// ============================================================
+function toast(ico,tit,desc,tipo=''){
+  const c=document.getElementById('toasts');
+  const d=document.createElement('div');
+  d.className=`toast${tipo==='red'?' tr':tipo==='green'?' tg':tipo==='wa'?' tw':''}`;
+  d.innerHTML=`<div class="t-ico">${ico}</div><div class="t-b"><div class="t-t">${tit}</div><div class="t-d">${desc}</div></div><div class="t-x" onclick="this.parentElement.remove()">✕</div>`;
+  c.appendChild(d);
+  setTimeout(()=>{d.style.opacity='0';d.style.transform='translateX(14px)';d.style.transition='.3s';setTimeout(()=>d.remove(),300);},5000);
+}
+
+// ============================================================
+// PLAN — LÓGICA CENTRAL
+// ============================================================
+function semana(){
+  const hoy=new Date(HOY);hoy.setHours(0,0,0,0);
+  const dow=hoy.getDay();
+  const lunes=addD(hoy,-(dow===0?6:dow-1));
+  return Array.from({length:5},(_,i)=>addD(lunes,i));
+}
+
+function tareasDia(fecha){
+  const f=new Date(fecha);f.setHours(0,0,0,0);
+  const res=[];
+  banos.forEach(b=>{
+    if(b.est!=='en_uso')return;
+    const pd=new Date(b.proxD);pd.setHours(0,0,0,0);
+    if(pd.getTime()===f.getTime()) res.push({tipo:'desinf',bano:b.id,cliente:b.cliente,zona:b.zona,tec:b.tec,fecha:f,urg:'normal',b});
+    if(b.vence){const pv=new Date(b.vence);pv.setHours(0,0,0,0);if(pv.getTime()===f.getTime()) res.push({tipo:'retiro',bano:b.id,cliente:b.cliente,zona:b.zona,tec:b.tec,fecha:f,urg:'alto',b});}
+  });
+  return res;
+}
+
+function tareasVencidas(){
+  const hoy=new Date(HOY);hoy.setHours(0,0,0,0);
+  return banos.filter(b=>b.est==='en_uso'&&diff(new Date(b.proxD),hoy)<0)
+    .map(b=>({tipo:'desinf',bano:b.id,cliente:b.cliente,zona:b.zona,tec:b.tec,fecha:new Date(b.proxD),urg:'vencido',dias:Math.abs(diff(new Date(b.proxD),hoy)),b}));
+}
+
+let diaActivo=null;
+
+function renderPlan(){
+  const dias=semana();
+  const hoy=new Date(HOY);hoy.setHours(0,0,0,0);
+  const vcds=tareasVencidas();
+  const hoyTareas=tareasDia(hoy);
+  let semTotal=0;dias.forEach(d=>{semTotal+=tareasDia(d).length;});
+
+  document.getElementById('r-urg').textContent=vcds.length;
+  document.getElementById('r-hoy').textContent=hoyTareas.length;
+  document.getElementById('r-sem').textContent=semTotal;
+  document.getElementById('r-ok').textContent=completadas.size;
+  document.getElementById('nb-u').textContent=vcds.length;
+  syncMobBadge();
+
+  // Render días
+  const wrap=document.getElementById('dias-wrap');
+  wrap.innerHTML=dias.map((dia,i)=>{
+    const tareas=tareasDia(dia);
+    const esHoy=dia.toDateString()===hoy.toDateString();
+    const esSel=diaActivo&&dia.toDateString()===diaActivo.toDateString();
+    const ds=tareas.filter(t=>t.tipo==='desinf').length;
+    const rs=tareas.filter(t=>t.tipo==='retiro').length;
+    const hechas=tareas.filter(t=>completadas.has(t.bano+'-'+t.tipo+'-'+fmt(dia))).length;
+    const pct=tareas.length?Math.round(hechas/tareas.length*100):0;
+    let cls='dia-card'+(esHoy?' es-hoy':'')+(esSel?' es-sel':'');
+    const prev=tareas.slice(0,3).map(t=>`
+      <div class="tarea-mini" onclick="event.stopPropagation();verDet('${t.bano}')">
+        <span class="tm-ico">${t.tipo==='desinf'?'🧴':'🚛'}</span>
+        <span>${t.cliente.length>18?t.cliente.slice(0,16)+'…':t.cliente} <span style="color:var(--text2);font-size:10px;">${t.bano}</span></span>
+      </div>`).join('');
+    return `<div class="${cls}" onclick="selDia(${i})">
+      <div class="dia-head"><span class="dia-nom">${DNOMS[dia.getDay()]}</span><span class="dia-fec">${dia.getDate()}/${dia.getMonth()+1}</span></div>
+      <div class="dia-body">${tareas.length===0?'<div class="dia-empty">Día libre ✓</div>':prev}${tareas.length>3?`<div style="font-size:10px;color:var(--text2);padding-top:3px;">+${tareas.length-3} más</div>`:''}</div>
+      <div class="dia-foot">
+        ${ds?`<span class="dc dc-y">🧴 ${ds}</span>`:''}
+        ${rs?`<span class="dc dc-r">🚛 ${rs}</span>`:''}
+        ${hechas?`<span class="dc dc-g">✅ ${hechas}</span>`:''}
+        ${!tareas.length?`<span class="dc" style="background:rgba(63,185,80,.06);color:var(--text2);">Libre</span>`:''}
+      </div>
+      ${tareas.length?`<div class="dia-prog"><div class="prog"><div class="prog-f" style="width:${pct}%"></div></div></div>`:''}
+    </div>`;
+  }).join('');
+
+  // Auto-seleccionar hoy
+  if(!diaActivo){
+    const dow=hoy.getDay();
+    if(dow>=1&&dow<=5) selDia(dow-1);
+    else selDia(0);
+  } else {
+    renderDetDia(diaActivo);
+  }
+}
+
+function selDia(i){
+  const dias=semana();
+  diaActivo=dias[i];
+  renderPlan();
+}
+
+function renderDetDia(fecha){
+  const f=new Date(fecha);f.setHours(0,0,0,0);
+  const hoy=new Date(HOY);hoy.setHours(0,0,0,0);
+  const esHoy=f.toDateString()===hoy.toDateString();
+  const tareas=tareasDia(f);
+  const vcds=esHoy?tareasVencidas():[];
+  const todas=[...vcds,...tareas];
+
+  document.getElementById('det-titulo').textContent=`${DNOMS[f.getDay()]} ${f.getDate()} de ${MESES[f.getMonth()]}${esHoy?' (HOY)':''} — ${todas.length} tarea(s)`;
+  document.getElementById('btn-wa-dia').style.display=todas.length?'inline-flex':'none';
+  document.getElementById('btn-todo').style.display=todas.length?'inline-flex':'none';
+
+  if(!todas.length){
+    document.getElementById('det-lista').innerHTML='<div style="padding:18px;color:var(--text2);font-size:13px;">🎉 Sin tareas para este día.</div>';
+    return;
+  }
+
+  document.getElementById('det-lista').innerHTML=todas.map(t=>{
+    const key=t.bano+'-'+t.tipo+'-'+fmt(f);
+    const done=completadas.has(key);
+    return `<div class="tarea-row${done?' done':''}" id="row-${key.replace(/[\/\s]/g,'')}">
+      <div class="check-box${done?' checked':''}" onclick="tick('${key}','${t.bano}','${t.tipo}','${t.tec}','${t.cliente}','${t.zona}')"></div>
+      <span class="tipo-badge ${t.tipo==='desinf'?'tb-d':'tb-r'}">${t.tipo==='desinf'?'Desinfección':'Retiro'}</span>
+      ${t.urg==='vencido'?`<span class="vcdo">⚠ ${t.dias}d atrasado</span>`:''}
+      <div class="tarea-info">
+        <div class="tarea-bano">${t.bano} — ${t.cliente}</div>
+        <div class="tarea-cli">${t.zona} &bull; Técnico: ${t.tec}</div>
+      </div>
+      <div class="tarea-acts">
+        <button class="btn btn-wa btn-xs" onclick="waT('${t.bano}','${t.tipo}','${t.tec}','${t.cliente}','${t.zona}')">💬</button>
+        <button class="btn btn-ghost btn-xs" onclick="verDet('${t.bano}')">👁</button>
+        ${!done?`<button class="btn btn-green btn-xs" onclick="tick('${key}','${t.bano}','${t.tipo}','${t.tec}','${t.cliente}','${t.zona}')">✓ Hecho</button>`:'<span style="color:var(--green);font-size:12px;font-weight:600;">✓ Listo</span>'}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function tick(key,bid,tipo,tec,cli,zona){
+  if(completadas.has(key)){completadas.delete(key);}
+  else{
+    completadas.add(key);
+    playS('ok');
+    if(tipo==='desinf'){const b=banos.find(x=>x.id===bid);if(b){b.ultD=new Date();b.proxD=addD(new Date(),b.freq);b.hist.unshift({fecha:fmt(new Date()),tipo:'Desinfección',tec,nota:'Realizada'});}}
+    if(tipo==='retiro'){const b=banos.find(x=>x.id===bid);if(b){b.est='disponible';b.cliente='—';b.clienteId=null;b.vence=null;b.hist.unshift({fecha:fmt(new Date()),tipo:'Retiro',tec,nota:'Retirado'});}}
+    toast('✅',`${tipo==='desinf'?'Desinfección':'Retiro'} completado`,`${bid} — ${cli}`,'green');
+  }
+  renderPlan();rBanos();
+  guardarTodo();
+}
+
+function completarTodo(){
+  if(!diaActivo)return;
+  const f=diaActivo;
+  [...tareasVencidas(),...tareasDia(f)].forEach(t=>{
+    const k=t.bano+'-'+t.tipo+'-'+fmt(f);
+    if(!completadas.has(k)) tick(k,t.bano,t.tipo,t.tec,t.cliente,t.zona);
+  });
+}
+
+// ============================================================
+// WHATSAPP
+// ============================================================
+function getTel(n){return(tecnicos.find(t=>t.nombre===n)||{}).tel||null;}
+function wa(tel,msg){
+  if(!tel||tel.length<8){toast('⚠️','Sin número','Configurá el número en 👥 Técnicos.','red');return;}
+  window.open(`https://wa.me/${tel}?text=${encodeURIComponent(msg)}`,'_blank');
+}
+function waT(bid,tipo,tec,cli,zona){
+  const b=banos.find(x=>x.id===bid);
+  const msg=tipo==='desinf'
+    ?`🧴 *DESINFECCIÓN — SaniTrack*\n\nHola ${tec}!\n📋 Baño: *${bid}*\n🏢 Cliente: ${cli}\n📍 Zona: ${zona}\n📅 Fecha: ${fmt(b?.proxD||new Date())}\n\n¿Podés confirmar cuando lo hagas? ¡Gracias!`
+    :`🚛 *RETIRO URGENTE — SaniTrack*\n\nHola ${tec}!\n📋 Baño: *${bid}*\n🏢 Cliente: ${cli}\n📍 Zona: ${zona}\n⚠️ Vence: ${b?.vence?fmt(b.vence):'HOY'}\n\n¡Coordinar a la brevedad! Gracias.`;
+  wa(getTel(tec),msg);
+}
+function waResumenDia(){
+  if(!diaActivo)return;
+  const todas=[...tareasVencidas(),...tareasDia(diaActivo)];
+  const pt={};todas.forEach(t=>{if(!pt[t.tec])pt[t.tec]=[];pt[t.tec].push(t);});
+  let i=0;
+  Object.entries(pt).forEach(([tec,ts])=>{
+    setTimeout(()=>{
+      const lineas=ts.map(t=>`• ${t.tipo==='desinf'?'🧴':'🚛'} ${t.bano} — ${t.cliente} (${t.zona})`).join('\n');
+      wa(getTel(tec),`📋 *PLAN DEL DÍA — SaniTrack*\nHola ${tec}!\n\n${DNOMS[diaActivo.getDay()]} ${diaActivo.getDate()}/${diaActivo.getMonth()+1}:\n\n${lineas}\n\n¡Confirmá cada tarea al completarla!`);
+    },i*700);i++;
+  });
+  toast('💬',`Mensajes para ${Object.keys(pt).length} técnico(s)`,'','wa');
+}
+function waMasivo(tipo){
+  const hoy=new Date(HOY);hoy.setHours(0,0,0,0);
+  let lista=tipo==='desinf'?[...tareasVencidas(),...tareasDia(hoy)].filter(t=>t.tipo==='desinf')
+    :banos.filter(b=>b.vence&&diff(new Date(b.vence),hoy)>=0&&diff(new Date(b.vence),hoy)<=3&&b.est==='en_uso').map(b=>({bano:b.id,tipo:'retiro',tec:b.tec,cliente:b.cliente,zona:b.zona}));
+  if(!lista.length){toast('✅','Sin pendientes','No hay tareas urgentes.','green');return;}
+  const pt={};lista.forEach(t=>{if(!pt[t.tec])pt[t.tec]=[];pt[t.tec].push(t);});
+  let i=0;
+  Object.entries(pt).forEach(([tec,ts])=>{
+    setTimeout(()=>{
+      const lineas=ts.map(t=>`• ${t.bano} — ${t.cliente} (${t.zona})`).join('\n');
+      const msg=tipo==='desinf'
+        ?`🧴 *DESINFECCIONES HOY — SaniTrack*\nHola ${tec}!\n${ts.length} desinfeción(es):\n${lineas}\n\n¡Confirmar al completar!`
+        :`🚛 *RETIROS URGENTES — SaniTrack*\nHola ${tec}!\n${ts.length} retiro(s):\n${lineas}\n\n¡A la brevedad!`;
+      wa(getTel(tec),msg);
+    },i*700);i++;
+  });
+  toast('💬',`WA a ${Object.keys(pt).length} técnico(s)`,'','wa');
+}
+
+// ============================================================
+// TABLA BAÑOS
+// ============================================================
+let fActual='todos';
+function rBanos(f){
+  fActual=f||fActual;
+  const hoy=new Date(HOY);hoy.setHours(0,0,0,0);
+  let lista=[...banos];
+  if(fActual==='en_uso')lista=lista.filter(b=>b.est==='en_uso');
+  else if(fActual==='disponible')lista=lista.filter(b=>b.est==='disponible');
+  else if(fActual==='mantenimiento')lista=lista.filter(b=>b.est==='mantenimiento');
+  else if(fActual==='desinf_urg')lista=lista.filter(b=>b.est==='en_uso'&&diff(new Date(b.proxD),hoy)<=0);
+  else if(fActual==='retiro_urg')lista=lista.filter(b=>b.vence&&diff(new Date(b.vence),hoy)>=0&&diff(new Date(b.vence),hoy)<=7);
+  document.getElementById('fc').textContent=`${lista.length} baños`;
+  document.getElementById('tb-banos').innerHTML=lista.map(b=>{
+    const hoyMs=new Date(HOY);hoyMs.setHours(0,0,0,0);
+    const dd=b.est==='en_uso'?diff(new Date(b.proxD),hoyMs):null;
+    let dB='—';
+    if(dd!==null){
+      if(dd<0)dB=`<span class="badge br">Vencida ${Math.abs(dd)}d</span>`;
+      else if(dd===0)dB=`<span class="badge by">Hoy</span>`;
+      else if(dd<=2)dB=`<span class="badge by">En ${dd}d</span>`;
+      else dB=`<span style="font-size:12px;color:var(--text2);">${fmt(b.proxD)}</span>`;
+    }
+    let vB='—';
+    if(b.vence){const dv=diff(new Date(b.vence),hoyMs);
+      if(dv<0)vB=`<span class="badge br">Vencido</span>`;
+      else if(dv<=3)vB=`<span class="badge br">${fmt(b.vence)}</span>`;
+      else if(dv<=7)vB=`<span class="badge by">${fmt(b.vence)}</span>`;
+      else vB=`<span style="font-size:12px;">${fmt(b.vence)}</span>`;}
+    const eB={en_uso:`<span class="badge bg">En uso</span>`,disponible:`<span class="badge bb">Disponible</span>`,mantenimiento:`<span class="badge by">Mantenimiento</span>`}[b.est];
+    return `<tr>
+      <td><span style="font-family:'DM Mono';font-size:12px;font-weight:600;">${b.id}</span></td>
+      <td>${eB}</td>
+      <td><div style="font-size:13px;font-weight:500;">${b.cliente}</div><div style="font-size:11px;color:var(--text2);">${b.zona}</div></td>
+      <td><span class="badge bx">${b.zona}</span></td>
+      <td style="font-size:12px;color:var(--text2);">${b.est==='en_uso'?fmt(b.ultD):'—'}</td>
+      <td>${dB}</td><td>${vB}</td>
+      <td style="font-size:12px;">${b.tec}</td>
+      <td style="white-space:nowrap;">
+        <button class="btn btn-ghost btn-xs" onclick="verDet('${b.id}')">👁 Ver</button>
+        ${b.est==='en_uso'?`<button class="btn btn-wa btn-xs" onclick="waT('${b.id}','desinf','${b.tec}','${b.cliente}','${b.zona}')">💬</button>`:''}
+      </td>
+    </tr>`;
+  }).join('');
+}
+function fBanos(f,el){document.querySelectorAll('#fb .filtro').forEach(x=>x.classList.remove('on'));el.classList.add('on');rBanos(f);}
+
+// ============================================================
+// DETALLE BAÑO
+// ============================================================
+function verDet(id){
+  const b=banos.find(x=>x.id===id);if(!b)return;
+  const hoy=new Date(HOY);hoy.setHours(0,0,0,0);
+  const dd=diff(new Date(b.proxD),hoy);
+  document.getElementById('m-det-tit').textContent=`🚻 ${b.id} — ${b.cliente}`;
+  document.getElementById('m-det-grid').innerHTML=`
+    <div class="di"><label>Estado</label><span>${{en_uso:'🟢 En uso',disponible:'🔵 Disponible',mantenimiento:'🟡 Mantenimiento'}[b.est]}</span></div>
+    <div class="di"><label>Zona</label><span>${b.zona}</span></div>
+    <div class="di"><label>Técnico</label><span>${b.tec}</span></div>
+    <div class="di"><label>Frec. desinf.</label><span>Cada ${b.freq} días</span></div>
+    <div class="di"><label>Última desinf.</label><span>${fmt(b.ultD)}</span></div>
+    <div class="di"><label>Próx. desinf.</label><span style="color:${dd<=0?'var(--red)':dd<=2?'var(--yellow)':'var(--green)'}">${fmt(b.proxD)} (${dd<0?`${Math.abs(dd)}d atrasada`:dd===0?'HOY':`en ${dd}d`})</span></div>
+    <div class="di"><label>Instalación</label><span>${fmt(b.instalacion)}</span></div>
+    <div class="di"><label>Vence contrato</label><span>${b.vence?fmt(b.vence):'—'}</span></div>`;
+  document.getElementById('m-det-hist').innerHTML=b.hist.map(h=>`
+    <div style="display:flex;gap:10px;padding:6px 0;border-bottom:1px solid var(--border);">
+      <span style="font-family:'DM Mono';font-size:11px;color:var(--text2);min-width:76px;">${h.fecha}</span>
+      <span style="font-size:12px;">${h.tipo}</span>
+      <span style="font-size:12px;color:var(--text2);">${h.tec}</span>
+    </div>`).join('');
+  document.getElementById('det-bd').onclick=()=>{regD(id);cerrarM('m-detalle');};
+  document.getElementById('det-br').onclick=()=>{regR(id);cerrarM('m-detalle');};
+  document.getElementById('det-wad').onclick=()=>waT(id,'desinf',b.tec,b.cliente,b.zona);
+  document.getElementById('det-war').onclick=()=>waT(id,'retiro',b.tec,b.cliente,b.zona);
+  abrirM('m-detalle');
+}
+function regD(id){const b=banos.find(x=>x.id===id);if(!b)return;b.ultD=new Date();b.proxD=addD(new Date(),b.freq);b.hist.unshift({fecha:fmt(new Date()),tipo:'Desinfección',tec:b.tec,nota:'Realizada'});playS('ok');toast('✅','Desinfección registrada',`${id} — próxima en ${b.freq} días`,'green');rBanos();renderPlan();guardarTodo();}
+function regR(id){const b=banos.find(x=>x.id===id);if(!b)return;b.est='disponible';b.cliente='—';b.clienteId=null;b.vence=null;b.hist.unshift({fecha:fmt(new Date()),tipo:'Retiro',tec:b.tec,nota:'Retirado'});playS('ok');toast('🚛','Retiro registrado',`${id} disponible`,'green');rBanos();renderPlan();guardarTodo();}
+
+// ============================================================
+// CLIENTES / VEHICULOS
+// ============================================================
+function rClientes(){
+  document.getElementById('tb-clientes').innerHTML=clientes.map(cl=>{
+    const a=banos.filter(b=>b.clienteId===cl.id&&b.est==='en_uso').length;
+    const p=banos.filter(b=>b.clienteId===cl.id&&b.vence).sort((a,b)=>new Date(a.vence)-new Date(b.vence))[0];
+    return `<tr><td><strong>${cl.nombre}</strong><br><span style="font-size:11px;color:var(--text2);">${cl.email}</span></td>
+      <td>${cl.contacto}<br><span style="font-size:11px;color:var(--text2);">${cl.tel}</span></td>
+      <td><span class="badge bx">${cl.zona}</span></td>
+      <td style="text-align:center;font-size:18px;font-weight:700;color:var(--accent);">${a}</td>
+      <td style="font-size:13px;">${p?fmt(p.vence):'—'}</td></tr>`;
+  }).join('');
+}
+function rVehiculos(){
+  document.getElementById('tb-veh').innerHTML=vehiculos.map(v=>`<tr>
+    <td><strong style="font-family:'DM Mono';">${v.pat}</strong></td>
+    <td>${v.cho}</td><td><span class="badge bx">${v.zona}</span></td>
+    <td style="text-align:center;">${v.cap}</td>
+    <td style="font-size:12px;">${v.srv}</td>
+    <td><span class="badge ${v.est==='service_vencido'?'br':'bg'}">${v.est==='service_vencido'?'Service vencido':'Operativo'}</span></td>
+  </tr>`).join('');
+}
+
+// ============================================================
+// TÉCNICOS
+// ============================================================
+function abrirTecnicos(){
+  document.getElementById('tec-lista').innerHTML=tecnicos.map((t,i)=>`
+    <div style="display:flex;align-items:center;gap:9px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 11px;margin-bottom:7px;">
+      <span style="font-size:20px;">👷</span>
+      <div style="flex:1;"><div style="font-weight:600;font-size:13px;">${t.nombre}</div><div style="font-size:11px;color:var(--text2);">${t.tel}</div></div>
+      <input id="ti-${i}" value="${t.tel}" placeholder="5492614..." style="width:155px;background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:5px 8px;color:var(--white);font-family:'DM Mono';font-size:12px;outline:none;">
+    </div>`).join('');
+  abrirM('m-tecnicos');
+}
+function guardarTecnicos(){tecnicos.forEach((t,i)=>{const e=document.getElementById(`ti-${i}`);if(e)t.tel=e.value.replace(/\D/g,'');});cerrarM('m-tecnicos');toast('✅','Guardado','Números de WhatsApp actualizados','green');guardarTodo();}
+
+// ============================================================
+// GUARDAR FORMS
+// ============================================================
+function guardarBano(){
+  const id=document.getElementById('nb-id').value||`BQ-${101+banos.length}`;
+  const freq=parseInt(document.getElementById('nb-freq').value)||7;
+  const vStr=document.getElementById('nb-vence').value;
+  banos.push({id,est:document.getElementById('nb-est').value,cliente:document.getElementById('nb-cli').value||'—',
+    clienteId:null,zona:document.getElementById('nb-zona').value,freq,ultD:new Date(),proxD:addD(new Date(),freq),
+    vence:vStr?new Date(vStr):null,tec:document.getElementById('nb-tec').value||'—',
+    instalacion:new Date(),notas:document.getElementById('nb-notas').value,hist:[]});
+  cerrarM('m-nuevo-bano');toast('✅','Baño registrado',`${id} agregado al inventario`,'green');rBanos();renderPlan();guardarTodo();
+}
+function guardarCliente(){
+  clientes.push({id:'CL'+(100+clientes.length+1),nombre:document.getElementById('cl-n').value,
+    contacto:document.getElementById('cl-c').value,tel:document.getElementById('cl-t').value,
+    email:document.getElementById('cl-e').value,zona:document.getElementById('cl-z').value});
+  cerrarM('m-cliente');toast('✅','Cliente guardado','','green');rClientes();guardarTodo();
+}
+function guardarVehiculo(){
+  vehiculos.push({pat:document.getElementById('vh-p').value,cho:document.getElementById('vh-c').value,
+    zona:document.getElementById('vh-z').value,cap:parseInt(document.getElementById('vh-cap').value)||5,
+    srv:document.getElementById('vh-s').value||'—',est:'activo'});
+  cerrarM('m-vehiculo');toast('✅','Vehículo guardado','','green');rVehiculos();guardarTodo();
+}
+
+// ============================================================
+// REPORTES CON CHART.JS
+// ============================================================
+let chs={};
+function rReportes(){
+  const hoy=new Date(HOY);hoy.setHours(0,0,0,0);
+  const enUso=banos.filter(b=>b.est==='en_uso').length;
+  const disp=banos.filter(b=>b.est==='disponible').length;
+  const mant=banos.filter(b=>b.est==='mantenimiento').length;
+  const ChOpts={responsive:true,maintainAspectRatio:true};
+  const gridColor='rgba(48,54,61,.5)';
+  const tickColor='#8b949e';
+
+  // Donut estado
+  if(chs.e)chs.e.destroy();
+  chs.e=new Chart(document.getElementById('ch-estado'),{type:'doughnut',
+    data:{labels:['En uso','Disponibles','Mantenimiento'],datasets:[{data:[enUso,disp,mant],backgroundColor:['#3fb950','#58a6ff','#d29922'],borderWidth:0,hoverOffset:5}]},
+    options:{...ChOpts,plugins:{legend:{position:'bottom',labels:{color:tickColor,font:{size:12},padding:10}},tooltip:{callbacks:{label:c=>`${c.label}: ${c.raw} baños`}}}}});
+
+  // Barras por zona
+  if(chs.z)chs.z.destroy();
+  chs.z=new Chart(document.getElementById('ch-zonas'),{type:'bar',
+    data:{labels:ZONAS,datasets:[
+      {label:'En uso',data:ZONAS.map(z=>banos.filter(b=>b.zona===z&&b.est==='en_uso').length),backgroundColor:'rgba(63,185,80,.7)',borderRadius:4},
+      {label:'Disponibles',data:ZONAS.map(z=>banos.filter(b=>b.zona===z&&b.est==='disponible').length),backgroundColor:'rgba(88,166,255,.5)',borderRadius:4}
+    ]},
+    options:{...ChOpts,scales:{x:{ticks:{color:tickColor},grid:{color:gridColor}},y:{ticks:{color:tickColor},grid:{color:gridColor}}},plugins:{legend:{labels:{color:tickColor,font:{size:12}}}}}});
+
+  // Línea desinfecciones
+  const mL=['Oct','Nov','Dic','Ene','Feb','Mar'];
+  if(chs.d)chs.d.destroy();
+  chs.d=new Chart(document.getElementById('ch-desinf'),{type:'line',
+    data:{labels:mL,datasets:[
+      {label:'Programadas',data:[68,75,62,80,71,77],borderColor:'#58a6ff',backgroundColor:'rgba(88,166,255,.1)',tension:.4,fill:true,pointBackgroundColor:'#58a6ff',pointRadius:4},
+      {label:'Realizadas',data:[58,70,55,72,68,71],borderColor:'#3fb950',backgroundColor:'rgba(63,185,80,.1)',tension:.4,fill:true,pointBackgroundColor:'#3fb950',pointRadius:4}
+    ]},
+    options:{...ChOpts,scales:{x:{ticks:{color:tickColor},grid:{color:gridColor}},y:{ticks:{color:tickColor},grid:{color:gridColor}}},plugins:{legend:{labels:{color:tickColor,font:{size:12}}}}}});
+
+  // Barras retiros/entregas
+  if(chs.m)chs.m.destroy();
+  chs.m=new Chart(document.getElementById('ch-mov'),{type:'bar',
+    data:{labels:mL,datasets:[
+      {label:'Entregas',data:[12,8,15,10,9,11],backgroundColor:'rgba(63,185,80,.7)',borderRadius:4},
+      {label:'Retiros',data:[10,9,13,8,10,9],backgroundColor:'rgba(248,81,73,.6)',borderRadius:4}
+    ]},
+    options:{...ChOpts,scales:{x:{ticks:{color:tickColor},grid:{color:gridColor}},y:{ticks:{color:tickColor},grid:{color:gridColor}}},plugins:{legend:{labels:{color:tickColor,font:{size:12}}}}}});
+
+  // Resumen op
+  const dHoy=banos.filter(b=>b.est==='en_uso'&&diff(new Date(b.proxD),hoy)<=0).length;
+  const rUrg=banos.filter(b=>b.vence&&diff(new Date(b.vence),hoy)>=0&&diff(new Date(b.vence),hoy)<=7&&b.est==='en_uso').length;
+  document.getElementById('op-resumen').innerHTML=[
+    ['Total baños en inventario',banos.length],['En uso actualmente',`${enUso} (${Math.round(enUso/banos.length*100)}%)`],
+    ['Disponibles para asignar',disp],['En mantenimiento',mant],
+    ['Desinfecciones urgentes hoy',dHoy],['Retiros urgentes esta semana',rUrg],
+    ['Vehículos operativos',vehiculos.filter(v=>v.est==='activo').length],
+  ].map(([k,v])=>`<div class="s-row"><span>${k}</span><span class="s-val">${v}</span></div>`).join('');
+
+  // Top clientes
+  document.getElementById('top-cl').innerHTML=[...clientes]
+    .map(c=>({nombre:c.nombre,n:banos.filter(b=>b.clienteId===c.id&&b.est==='en_uso').length}))
+    .sort((a,b)=>b.n-a.n).slice(0,5)
+    .map((c,i)=>`<div class="s-row"><span><span style="color:var(--text2);margin-right:6px;">${i+1}.</span>${c.nombre.length>26?c.nombre.slice(0,24)+'…':c.nombre}</span><span class="s-val">${c.n}</span></div>`).join('');
+}
+
+// ============================================================
+// NAV / MODAL
+// ============================================================
+const NMS={plan:'Plan de trabajo',banos:'Todos los baños',clientes:'Clientes',vehiculos:'Vehículos',reportes:'Reportes'};
+function ir(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>{if(n.textContent.trim().toLowerCase().includes(NMS[id]?.toLowerCase().slice(0,4)))n.classList.add('active');});
+  document.getElementById('tt').textContent=NMS[id]||id;
+  setMobNav(id);
+  if(id==='banos')rBanos();
+  if(id==='clientes')rClientes();
+  if(id==='vehiculos')rVehiculos();
+  if(id==='reportes')setTimeout(rReportes,50);
+}
+function abrirM(id){document.getElementById(id).classList.add('open');}
+function cerrarM(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.overlay').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
+function expCSV(){const h=['ID','Estado','Cliente','Zona','Última','Próxima','Vence','Técnico'];const r=banos.map(b=>[b.id,b.est,b.cliente,b.zona,fmt(b.ultD),fmt(b.proxD),b.vence?fmt(b.vence):'',b.tec]);const csv=[h,...r].map(x=>x.join(',')).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='sanitrack.csv';a.click();}
+
+// ============================================================
+// PERSISTENCIA — localStorage
+// ============================================================
+const LS_KEYS = {
+  banos:     'st_banos',
+  clientes:  'st_clientes',
+  vehiculos: 'st_vehiculos',
+  tecnicos:  'st_tecnicos',
+  completadas: 'st_completadas',
+};
+
+// Serializar fechas para JSON
+function serBano(b){
+  return {...b,
+    ultD: b.ultD instanceof Date ? b.ultD.toISOString() : b.ultD,
+    proxD: b.proxD instanceof Date ? b.proxD.toISOString() : b.proxD,
+    vence: b.vence instanceof Date ? b.vence.toISOString() : b.vence,
+    instalacion: b.instalacion instanceof Date ? b.instalacion.toISOString() : b.instalacion,
+  };
+}
+function deserBano(b){
+  return {...b,
+    ultD: b.ultD ? new Date(b.ultD) : new Date(),
+    proxD: b.proxD ? new Date(b.proxD) : new Date(),
+    vence: b.vence ? new Date(b.vence) : null,
+    instalacion: b.instalacion ? new Date(b.instalacion) : new Date(),
+  };
+}
+
+function guardarTodo(){
+  try {
+    localStorage.setItem(LS_KEYS.banos,     JSON.stringify(banos.map(serBano)));
+    localStorage.setItem(LS_KEYS.clientes,  JSON.stringify(clientes));
+    localStorage.setItem(LS_KEYS.vehiculos, JSON.stringify(vehiculos));
+    localStorage.setItem(LS_KEYS.tecnicos,  JSON.stringify(tecnicos));
+    localStorage.setItem(LS_KEYS.completadas, JSON.stringify([...completadas]));
+  } catch(e){ console.warn('localStorage lleno:', e); }
+}
+
+function cargarDatos(){
+  try {
+    const sb = localStorage.getItem(LS_KEYS.banos);
+    if(sb){ banos = JSON.parse(sb).map(deserBano); }
+
+    const sc = localStorage.getItem(LS_KEYS.clientes);
+    if(sc){ clientes = JSON.parse(sc); }
+
+    const sv = localStorage.getItem(LS_KEYS.vehiculos);
+    if(sv){ vehiculos = JSON.parse(sv); }
+
+    const st = localStorage.getItem(LS_KEYS.tecnicos);
+    if(st){ tecnicos = JSON.parse(st); }
+
+    const scomp = localStorage.getItem(LS_KEYS.completadas);
+    if(scomp){ completadas = new Set(JSON.parse(scomp)); }
+
+    return true; // datos cargados desde storage
+  } catch(e){
+    console.warn('Error al cargar datos guardados:', e);
+    return false;
+  }
+}
+
+function resetearDatos(){
+  if(!confirm('⚠️ ¿Seguro que querés borrar TODOS los datos y volver al estado inicial?\n\nEsta acción no se puede deshacer.')) return;
+  Object.values(LS_KEYS).forEach(k => localStorage.removeItem(k));
+  location.reload();
+}
+
+// ============================================================
+// CHEQUEO AUTOMÁTICO DE ALERTAS
+// ============================================================
+let notSet=new Set();
+function chequear(){
+  const hoy=new Date(HOY);hoy.setHours(0,0,0,0);
+  banos.forEach(b=>{
+    if(b.est!=='en_uso')return;
+    const dd=diff(new Date(b.proxD),hoy);
+    const k=`d${b.id}${fmt(b.proxD)}`;
+    if(dd<=0&&!notSet.has(k)){notSet.add(k);playS('urgente');toast('🧴','Desinfección urgente',`${b.id} — ${b.cliente}${dd<0?` (${Math.abs(dd)}d atrasada)`:' (HOY)'}` ,'red');}
+    if(b.vence){const dv=diff(new Date(b.vence),hoy);const kv=`r${b.id}`;if(dv<=1&&dv>=0&&!notSet.has(kv)){notSet.add(kv);playS('warn');toast('🚛','Retiro urgente',`${b.id} — ${b.cliente} vence ${dv===0?'hoy':'mañana'}`,'red');}}
+  });
+}
+
+// ============================================================
+// INIT
+// ============================================================
+// Intentar cargar datos guardados; si no hay, usar los generados
+const teniaDatos = cargarDatos();
+
+const h=new Date().getHours();
+document.getElementById('saludo').textContent=h<12?'Buenos días 👋':h<18?'Buenas tardes 👋':'Buenas noches 👋';
+document.getElementById('f-hoy').textContent=`${DNOMS[HOY.getDay()]} ${HOY.getDate()} de ${MESES[HOY.getMonth()]} ${HOY.getFullYear()}`;
+document.querySelectorAll('.nav-item')[0].classList.add('active');
+renderPlan();
+rBanos();rClientes();rVehiculos();
+if('Notification'in window&&Notification.permission==='default')Notification.requestPermission();
+chequear();
+setInterval(chequear,60000);
+
+// Guardar automáticamente cada vez que cambia algo
+// (tick, regD, regR, guardarBano, guardarCliente, guardarVehiculo, guardarTecnicos ya llaman guardarTodo)
+setInterval(guardarTodo, 10000); // backup cada 10 seg
+
+// Agregar botón "Borrar datos" al sidebar bottom
+document.querySelector('.sidebar-bottom').insertAdjacentHTML('beforeend',`
+  <button onclick="resetearDatos()" style="margin-top:8px;width:100%;padding:6px;background:transparent;border:1px solid rgba(248,81,73,.3);border-radius:6px;color:rgba(248,81,73,.7);font-size:11px;cursor:pointer;font-family:'Inter';" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='rgba(248,81,73,.3)';this.style.color='rgba(248,81,73,.7)'">
+    🗑 Borrar todos los datos
+  </button>`);
+
+const esPrimerUso = !teniaDatos;
+setTimeout(()=>{
+  if(esPrimerUso){
+    toast('🚽','SaniTrack listo',`Datos de ejemplo cargados • ${banos.filter(b=>b.est==='en_uso').length} baños en uso`);
+  } else {
+    toast('💾','Datos restaurados',`Se cargaron tus datos guardados • ${banos.length} baños`,'green');
+  }
+},700);
+</script>
+</body>
+</html>
